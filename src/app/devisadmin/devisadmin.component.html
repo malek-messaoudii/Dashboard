@@ -1,0 +1,77 @@
+<div class="navbar-container">
+    <div class="navbar-left">
+        <a routerLink="/dashboard">
+            <img alt="" src="../../assets/logo2.png" class="logo" />
+        </a>
+    </div>
+    <div class="navbar-middle">
+        <input type="text" placeholder="Rechercher" class="navbar-search">
+    </div>
+    <div class="navbar-right">
+        <mat-icon class="navbar-icon">local_phone</mat-icon>
+        <mat-icon class="navbar-icon">email</mat-icon>
+        <mat-icon class="navbar-icon">home</mat-icon>
+        <mat-icon class="navbar-icon">account_circle</mat-icon>
+    </div>
+</div>
+
+<div class="background">
+    <br><br><br>
+
+    <div class="container">
+        <div class="sidebar">
+            <app-sidebaradmin></app-sidebaradmin>
+        </div>
+
+        <div class="users-container">
+            <div class="header">
+                <h2 class="text">LES DEMANDES DE DEVIS</h2>
+            </div>
+
+            <!-- Utilisation de *ngIf pour gérer l'affichage conditionnel -->
+            <div *ngIf="devisList.length === 0" class="no-users-message">
+                Aucune demande de devis
+            </div>
+
+            <!-- Boucle sur devisList pour afficher chaque demande de devis dans un container -->
+            <div *ngFor="let devis of devisList" class="devis-container">
+                <div class="devis-details">
+                    <p><strong>Numéro de devis :</strong> {{ devis.numdevis}}</p>
+                    <p><strong>Date de création :</strong> {{ devis.dateCreation | slice:0:10 }}</p>
+                    <p><strong>Véhicule:</strong>
+                        {{ devis.vehicule.make || 'non renseigné' }}
+                        {{ devis.vehicule.model }} -
+                        {{ devis.vehicule.immatriculation || 'non renseignée' }}
+                        ({{ devis.vehicule.kilo || 'non renseigné' }} km)
+                    </p>
+                    <p><strong>Prestation:</strong> {{ devis.prestation.titre || 'non renseigné' }} - 
+                    {{ devis.prestation.selectedTypes.length > 0 ? devis.prestation.selectedTypes.join(', ') : 'Aucun type sélectionné' }} -
+                    {{ devis.prestation.options.length > 0 ? devis.prestation.options.join(', ') : 'Aucune option sélectionnée' }} -
+                  {{ devis.prestation.desc || 'Aucune description' }}</p>
+                    <p><strong>Email:</strong> {{ devis.utilisateur.email }}</p>
+                    <p><strong>Statut:</strong> {{ devis.status }}</p>
+                    <p><strong>Rdv:</strong> {{ devis.rdv}}</p>
+                    <p><strong>Devis reçu:</strong> {{ devis.devisrec}}</p>
+                    <p><strong>Demande de prét d'une voiture:</strong> {{ devis.voiturepret || 'non renseigné' }}</p>
+                    <p><strong>Pièces jointes relatives:</strong></p>
+                    <div class="images-container">
+                        <ng-container *ngIf="devis.images && devis.images.length > 0; else noImages">
+                            <img *ngFor="let image of devis.images; let i = index" [src]="image" [alt]="'Devis ' + (i + 1)" class="image" />
+                        </ng-container>
+                        <ng-template #noImages>
+                            <p>Aucune image téléchargée.</p>
+                        </ng-template>
+                    </div>
+                      
+                </div>
+                <div class="actions">
+                    <button class="btn-receive" (click)="marquerDevisRecu(devis._id)">Reçu</button>
+                    <button class="btn-accept" (click)="validerDevis(devis._id)">Valider</button>
+                    <button class="btn-reject" (click)="refuserDevis(devis._id)">Refuser</button> <br> <br>
+                    <button class="btn-planif" (click)="programmerrdv(devis._id)">Planifier</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
