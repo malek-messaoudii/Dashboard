@@ -2,7 +2,9 @@
 export interface Promotion {
   _id: string;
   price: number;
-  description: string;
+  prestation: {
+    titre: string;
+  },
   mois:string
 }
 

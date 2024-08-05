@@ -55,6 +55,7 @@ import { AjoutadminComponent } from './ajoutadmin/ajoutadmin.component';
 import { PromotionsComponent } from './promotions/promotions.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { RdvComponent } from './rdv/rdv.component';
+import { RdvpComponent } from './rdvp/rdvp.component';
 
 
 @NgModule({
@@ -97,6 +98,7 @@ import { RdvComponent } from './rdv/rdv.component';
     PromotionsComponent,
     DashboardComponent,
     RdvComponent,
+    RdvpComponent,
   ],
   imports: [
     BrowserModule,

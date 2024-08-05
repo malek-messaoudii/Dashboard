@@ -1,19 +1,19 @@
 <div class="navbar-container">
     <div class="navbar-left">
-        <a routerLink="/dashboard">
-            <img alt="" src="../../assets/logo2.png" class="logo" />
-        </a>
+      <a routerLink="/dashboard">
+        <img alt="Logo" src="../../assets/logo2.png" class="logo" />
+      </a>
     </div>
     <div class="navbar-middle">
-        <input type="text" placeholder="Rechercher" id="navbar-search">
+      <input type="text" placeholder="Rechercher" id="navbar-search">
     </div>
     <div class="navbar-right">
-        <mat-icon class="navbar-icon">local_phone</mat-icon>
-        <mat-icon class="navbar-icon">email</mat-icon>
-        <mat-icon class="navbar-icon">home</mat-icon>
-        <mat-icon class="navbar-icon">account_circle</mat-icon>
+      <mat-icon class="navbar-icon">local_phone</mat-icon>
+      <mat-icon class="navbar-icon">email</mat-icon>
+      <mat-icon class="navbar-icon">home</mat-icon>
+      <mat-icon class="navbar-icon">account_circle</mat-icon>
     </div>
-</div>
+  </div>
 
 <div class="background">
     <br><br><br>
@@ -25,53 +25,21 @@
 
         <div class="users-container">
             <div class="header">
-                <h2 class="text">Gestion des rendez-vous</h2>
+                <h2 class="text">Gestion des rendez-vous non programmés </h2>
                 <div class="input-group">
                     <input type="text" placeholder="Rechercher" id="search">
                 </div>
-                <button class="b1" (click)="openModal()">Planifier un rendez-vous</button>
             </div>
 
             <br>
 
-            <div class="rdv-list">
-                <h3>Rendez-vous programmés</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Numéro de devis</th>
-                            <th>Type</th>
-                            <th>Catégorie</th>
-                            <th>Marque</th>
-                            <th>Modéle</th>
-                            <th>Immatriculation</th>
-                            <th>Email</th>
-                            <th>Devis reçu</th>
-                            <th>RDV programmé</th>
-                        </tr>
-                    </thead>
-                    <tbody *ngIf="rdvWithDevisRec.length > 0; else noRdvWithDevis">
-                        <tr *ngFor="let rdv of rdvWithDevisRec">
-                            <td>{{ rdv.numdevis }}</td>
-                            <td>{{ rdv.type }}</td>
-                            <td>{{ rdv.titrepres }}</td>
-                            <td>{{ rdv.vehicule.make }}</td>
-                            <td>{{ rdv.vehicule.model }}</td>
-                            <td>{{ rdv.vehicule.immatriculation }}</td>
-                            <td>{{ rdv.email }}</td>
-                            <td>{{ rdv.devisrec ? 'Oui' : 'Non' }}</td>
-                          <td>  <b> {{ rdv.datesouhaite | date:'shortDate' }} : {{ rdv.heuresouhaite }}h </b> </td>
-                        </tr>
-                    </tbody>
-                    <ng-template #noRdvWithDevis>
-                        <tr>
-                            <td colspan="9" class="text-center">Aucun rendez-vous avec devis reçu trouvé.</td>
-                        </tr>
-                    </ng-template>
-                </table>
+            <!-- Loop through unique emails and display rdv lists -->
+            <div *ngFor="let email of getEmails()" class="user-email-container">
+                <div class="header2">
+                    <h3 class="text2">Rendez-vous non programmés pour {{ email }}</h3>
+                </div>
 
-                <h3>Rendez-vous non programmés</h3>
-                <table class="table">
+                <table class="table" *ngIf="getRdvForEmail(email).length > 0; else noRdvWithoutDevis">
                     <thead>
                         <tr>
                             <th>Numéro de devis</th>
@@ -85,90 +53,28 @@
                             <th>Devis reçu</th>
                         </tr>
                     </thead>
-                    <tbody *ngIf="rdvWithoutDevisRec.length > 0; else noRdvWithoutDevis">
-                        <tr *ngFor="let rdv of rdvWithoutDevisRec">
-                            <td>{{ rdv.numdevis }}</td>
-                            <td>{{ rdv.datesouhaite | date:'shortDate' }}</td>
-                            <td>{{ rdv.heuresouhaite }}</td>
-                            <td>{{ rdv.titrepres }}</td>
-                            <td>{{ rdv.voiturepret }}</td>
-                            <td>{{ rdv.email }}</td>
-                            <td>{{ rdv.rdv }}</td>
-                            <td>{{ rdv.type }}</td>
+                    <tbody>
+                        <tr *ngFor="let rdv of getRdvForEmail(email)">
+                            <td>{{ rdv.numdevis || 'non renseigné' }}</td>
+                            <td>{{ rdv.datesouhaite ? (rdv.datesouhaite | date:'shortDate') : 'non renseigné' }}</td>
+                            <td>{{ rdv.heuresouhaite || 'non renseigné' }}</td>
+                            <td>{{ rdv.titrepres || 'non renseigné' }}</td>
+                            <td>{{ rdv.voiturepret || 'non renseigné' }}</td>
+                            <td>{{ rdv.email || 'non renseigné' }}</td>
+                            <td>{{ rdv.rdv || 'non renseigné' }}</td>
+                            <td>{{ rdv.type || 'non renseigné' }}</td>
                             <td>{{ rdv.devisrec ? 'Oui' : 'Non' }}</td>
                         </tr>
                     </tbody>
-                    <ng-template #noRdvWithoutDevis>
-                        <tr>
-                            <td colspan="9" class="text-center">Aucun rendez-vous sans devis reçu trouvé.</td>
-                        </tr>
-                    </ng-template>
                 </table>
+
+                <ng-template #noRdvWithoutDevis>
+                    <tr>
+                        <td colspan="9" class="text-center">Aucun rendez-vous sans devis reçu trouvé pour cet email.</td>
+                    </tr>
+                </ng-template>
             </div>
 
-            <div class="modal" [ngClass]="{ 'show-modal': showModal }">
-                <div class="modal-content">
-                    <h2 class="tot">Fixer un rendez-vous</h2>
-                    <form [formGroup]="addrdvForm" (submit)="submitRdv()">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Numéro de devis</label>
-                                <input type="text" formControlName="numdevis" required placeholder="Entrer le numéro de devis">
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" formControlName="email" (ngModelChange)="fetchVehicules()" required placeholder="Entrer l'email de la personne">
-                            </div>
-                            <div class="form-group">
-                                <label>Date du rendez-vous :</label>
-                                <input type="date" formControlName="datesouhaite" required placeholder="Entrer la date fixée du rendez-vous">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Heure du rendez-vous :</label>
-                                <input type="text" formControlName="heuresouhaite" required placeholder="Entrer l'heure fixée du rendez-vous">
-                            </div>
-                            <div class="form-group">
-                                <label for="titrepres">Prestation : *</label>
-                                <select id="titrepres" formControlName="titrepres" required>
-                                    <option disabled selected>Choisissez une prestation</option>
-                                    <option value="FORFAIT RÉVISION">FORFAIT RÉVISION</option>
-                                    <option value="FORFAIT FREINAGE">FORFAIT FREINAGE</option>
-                                    <option value="FORFAIT AMORTISSEUR">FORFAIT AMORTISSEUR</option>
-                                    <option value="FORFAIT EMBRAYAGE">FORFAIT EMBRAYAGE</option>
-                                    <option value="DÉMARRAGE">DÉMARRAGE</option>
-                                    <option value="FORFAIT KIT DE DISTRIBUTION">FORFAIT KIT DE DISTRIBUTION</option>
-                                    <option value="DIRECTION">DIRECTION</option>
-                                    <option value="FORFAIT ÉCHAPPEMENT">FORFAIT ÉCHAPPEMENT</option>
-                                    <option value="FORFAIT CLIMATISATION">FORFAIT CLIMATISATION</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="vehicule">Choisissez votre véhicule : *</label>
-                                <select id="vehicule" formControlName="vehicule" required>
-                                    <option disabled selected>Choisissez un véhicule</option>
-                                    <option *ngFor="let vehicule of vehicules" [ngValue]="vehicule">{{ vehicule.immatriculation }} - {{ vehicule.make }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Devis reçu</label>
-                                <input type="checkbox" formControlName="devisrec">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group centered-buttons">
-                                <button type="submit">Ajouter RDV</button>
-                                <button  class="closered-button" (click)="closeModal()">Fermer</button>
-                            </div>
-                        </div>
-                                            </form>
-                </div>
-            </div>
         </div>
     </div>
 </div>

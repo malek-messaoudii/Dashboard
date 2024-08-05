@@ -4,15 +4,15 @@ import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-rdv',
-  templateUrl: './rdv.component.html',
-  styleUrls: ['./rdv.component.css']
+  selector: 'app-rdvp',
+  templateUrl: './rdvp.component.html',
+  styleUrls: ['./rdvp.component.css']
 })
-export class RdvComponent implements OnInit {
+export class RdvpComponent implements OnInit {
+
   rdv: any[] = [];
-  rdvWithoutDevisRec: any[] = [];
+  rdvWithDevisRec: any[] = [];
   showModal: boolean = false;
-  formData: any = {};
   vehicules: any[] = [];
   email: string = '';
   addrdvForm: FormGroup;
@@ -27,7 +27,7 @@ export class RdvComponent implements OnInit {
       datesouhaite: ['', Validators.required],
       heuresouhaite: ['', Validators.required],
       titrepres: ['', Validators.required],
-      devisrec :[false],
+      devisrec: [false],
       email: ['', [Validators.required, Validators.email]]
     });
   }
@@ -40,7 +40,7 @@ export class RdvComponent implements OnInit {
     this.http.get<any[]>(`${this.apiUrl}/getall`)
       .subscribe(
         (response) => {
-          this.rdv = response || []; // Ensure response is not null
+          this.rdv = response || [];
           this.separateRendezVous();
         },
         (error) => {
@@ -51,27 +51,19 @@ export class RdvComponent implements OnInit {
   }
 
   separateRendezVous(): void {
-    this.rdvWithoutDevisRec = this.rdv.filter(r => !r?.devisrec); // Safe navigation operator
-  }
-
-  getEmails(): string[] {
-    const emails = this.rdvWithoutDevisRec.map(r => r.email);
-    return [...new Set(emails)]; // Return unique emails
-  }
-
-  getRdvForEmail(email: string): any[] {
-    return this.rdvWithoutDevisRec.filter(r => r.email === email);
+    this.rdvWithDevisRec = this.rdv.filter(rdv => rdv.devisrec);
   }
 
   fetchVehicules(): void {
-    if (!this.addrdvForm.get('email')?.value) { // Safe navigation operator
+    const email = this.addrdvForm.get('email')?.value;
+    if (!email) {
       return;
     }
 
-    this.http.get<any[]>(`${this.apiUrl1}/user/${this.addrdvForm.get('email')?.value}`)
+    this.http.get<any[]>(`${this.apiUrl1}/user/${email}`)
       .subscribe(
         (response) => {
-          this.vehicules = response || []; // Ensure response is not null
+          this.vehicules = response || [];
           if (this.vehicules.length === 0) {
             this.toastr.info('Aucun véhicule trouvé pour cet email');
           }
@@ -81,6 +73,15 @@ export class RdvComponent implements OnInit {
           this.toastr.error('Erreur lors de la récupération des véhicules');
         }
       );
+  }
+
+  getEmails(): string[] {
+    const emails = this.rdvWithDevisRec.map(rdv => rdv.email);
+    return [...new Set(emails)];
+  }
+
+  getRdvForEmail(email: string): any[] {
+    return this.rdvWithDevisRec.filter(rdv => rdv.email === email);
   }
 
   openModal(): void {
@@ -100,19 +101,17 @@ export class RdvComponent implements OnInit {
     if (this.addrdvForm.invalid) {
       return;
     }
-  
-    // Lors de la soumission, assurez-vous que 'devisrec' est inclus dans les données envoyées
-    const formData = { ...this.addrdvForm.value, devisrec: this.addrdvForm.get('devisrec')?.value };
-  
-    this.formData.vehicule = this.formData.vehicule?._id; // Assurez-vous que cette partie est correctement gérée
-  
+
+    const formData = { ...this.addrdvForm.value };
+    formData.vehicule = this.vehicules.find(v => v._id === formData.vehicule)?._id;
+
     this.http.post<any>(`${this.apiUrl}/addrdv`, formData)
       .subscribe(
         (response) => {
           console.log('Rendez-vous ajouté avec succès:', response);
           this.toastr.success('Rendez-vous ajouté avec succès');
-          this.fetchRendezVous(); // Rafraîchir la liste des rendez-vous
-          this.closeModal(); // Fermer le modal après soumission réussie
+          this.fetchRendezVous();
+          this.closeModal();
         },
         (error) => {
           console.error('Erreur lors de l\'ajout du rendez-vous:', error);

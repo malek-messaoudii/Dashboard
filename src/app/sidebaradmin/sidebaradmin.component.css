@@ -1,6 +1,6 @@
 /* Style pour la sidebar */
 .sidebar {
-    width: 250px;
+    width: 270px;
     background-color:#007bff;
     height: calc(100vh - 50px); /* Ajustez la hauteur en fonction de la hauteur de la navbar */
     position: fixed;

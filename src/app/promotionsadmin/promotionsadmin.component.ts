@@ -10,12 +10,23 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PromotionsadminComponent implements OnInit {
   promotions: Promotion[] = [];
-  newPromotion: Promotion = { _id: '', price: 0, description: '', mois:''};
-
+  newPromotion: Promotion = { _id: '', price: 0, prestation: { titre: '' }, mois: '' };
 
   months: string[] = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+  ];
+
+  prestations = [
+    { titre: 'FORFAIT RÉVISION' },
+    { titre: 'FORFAIT FREINAGE' },
+    { titre: 'FORFAIT AMORTISSEUR' },
+    { titre: 'FORFAIT EMBRAYAGE' },
+    { titre: 'DÉMARRAGE' },
+    { titre: 'FORFAIT KIT DE DISTRIBUTION' },
+    { titre: 'DIRECTION' },
+    { titre: 'FORFAIT ÉCHAPPEMENT' },
+    { titre: 'FORFAIT CLIMATISATION' }
   ];
 
   constructor(private promotionService: PromotionService, private toastr: ToastrService) { }
@@ -31,22 +42,28 @@ export class PromotionsadminComponent implements OnInit {
   }
 
   addPromotion(): void {
-    this.promotionService.addPromotion(this.newPromotion).subscribe(data => {
-      this.promotions.push(data);
-      this.newPromotion = { _id: '', price: 0, description: '', mois:'' };
-      this.toastr.success('Promotion ajoutée avec succés.');
-    });
+    this.promotionService.addPromotion(this.newPromotion).subscribe(
+      data => {
+        this.promotions.push(data);
+        this.newPromotion = { _id: '', price: 0, prestation: { titre: '' }, mois: '' };
+        this.toastr.success('Promotion ajoutée avec succès.');
+      },
+      error => {
+        this.toastr.error('Erreur lors de l\'ajout de la promotion.');
+        console.error('Error adding promotion:', error);
+      }
+    );
   }
 
   deletePromotion(id: string): void {
     this.promotionService.deletePromotion(id).subscribe(
-      (res) => {
-        console.log('Promotion deleted successfully');
-        this.toastr.success('Promotion supprimée avec succés.');
-        this.fetchPromotions(); // Refresh the list after deletion
+      () => {
+        this.promotions = this.promotions.filter(promotion => promotion._id !== id);
+        this.toastr.success('Promotion supprimée avec succès.');
       },
-      (err) => {
-        console.error('Error deleting promotion:', err);
+      error => {
+        this.toastr.error('Erreur lors de la suppression de la promotion.');
+        console.error('Error deleting promotion:', error);
       }
     );
   }

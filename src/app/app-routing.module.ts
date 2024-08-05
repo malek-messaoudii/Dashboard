@@ -17,6 +17,7 @@ import { AjoutadminComponent } from './ajoutadmin/ajoutadmin.component';
 import { PromotionsadminComponent } from './promotionsadmin/promotionsadmin.component';
 import { DevisadminComponent } from './devisadmin/devisadmin.component';
 import { RdvComponent } from './rdv/rdv.component';
+import { RdvpComponent } from './rdvp/rdvp.component';
 
 const routerOptions: ExtraOptions = {
   scrollPositionRestoration: 'enabled',
@@ -35,6 +36,7 @@ const routes: Routes = [
   { path: 'modifier' , component : ModifadminComponent},
   { path: 'ajoutadmin', component: AjoutadminComponent },
   { path: 'rdv', component: RdvComponent },
+  { path: 'rdvp', component: RdvpComponent },
   { path: '**' , component : NotfoundComponent}
 
 
